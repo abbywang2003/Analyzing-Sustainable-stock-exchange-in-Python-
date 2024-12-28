@@ -1,0 +1,224 @@
+# SSE Composite Index Data Analysis
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import scipy.stats as stats
+from scipy.stats import norm
+import seaborn as sns
+
+# Load and prepare the data
+# Note: You'll need to download the SSE dataset from Kaggle
+df = pd.read_csv('sse_data.csv')
+closing_prices = df['Close'].tail(1000)  # Get last 1000 records
+
+# Calculate log returns
+log_returns = np.log(closing_prices / closing_prices.shift(1)).dropna()
+
+# Visualize the distribution of log returns
+plt.figure(figsize=(10, 6))
+plt.hist(log_returns, bins=50, density=True, alpha=0.7, color='blue')
+plt.title('Distribution of Log Returns')
+plt.xlabel('Log Returns')
+plt.ylabel('Density')
+plt.grid(True, alpha=0.3)
+
+# Fit normal distribution
+mu, std = norm.fit(log_returns)
+xmin, xmax = plt.xlim()
+x = np.linspace(xmin, xmax, 100)
+p = norm.pdf(x, mu, std)
+plt.plot(x, p, 'r-', lw=2, label=f'Normal(μ={mu:.2f}, σ={std:.2f})')
+plt.legend()
+plt.show()
+
+# Define classes for Bayesian inference
+class NormalGammaPrior:
+    def __init__(self, mu_0=0, lambda_0=10000, alpha_0=1, beta_0=1000):
+        self.mu_0 = mu_0
+        self.lambda_0 = lambda_0
+        self.alpha_0 = alpha_0
+        self.beta_0 = beta_0
+
+class GibbsSampler:
+    def __init__(self, data, prior, n_iterations):
+        self.data = data
+        self.prior = prior
+        self.n_iterations = n_iterations
+        self.n = len(data)
+        self.y_bar = np.mean(data)
+        self.mu_samples = np.zeros(n_iterations)
+        self.tau_samples = np.zeros(n_iterations)
+        
+    def run(self):
+        # Initialize
+        mu = self.y_bar
+        tau = 1/np.var(self.data)
+        
+        for i in range(self.n_iterations):
+            # Sample mu
+            lambda_n = self.prior.lambda_0 + self.n * tau
+            mu_n = (self.prior.lambda_0 * self.prior.mu_0 + self.n * tau * self.y_bar) / lambda_n
+            mu = np.random.normal(mu_n, 1/np.sqrt(lambda_n))
+            
+            # Sample tau
+            alpha_n = self.prior.alpha_0 + self.n/2
+            beta_n = self.prior.beta_0 + 0.5 * np.sum((self.data - mu)**2)
+            tau = np.random.gamma(alpha_n, 1/beta_n)
+            
+            # Store samples
+            self.mu_samples[i] = mu
+            self.tau_samples[i] = tau
+            
+    def plot_chains(self):
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))
+        
+        ax1.plot(self.mu_samples)
+        ax1.set_title('μ Chain')
+        ax1.set_xlabel('Iteration')
+        ax1.set_ylabel('μ')
+        
+        ax2.plot(self.tau_samples)
+        ax2.set_title('τ Chain')
+        ax2.set_xlabel('Iteration')
+        ax2.set_ylabel('τ')
+        
+        plt.tight_layout()
+        plt.show()
+
+# Run Gibbs sampling
+prior = NormalGammaPrior()
+sampler = GibbsSampler(log_returns, prior, n_iterations=1000)
+sampler.run()
+sampler.plot_chains()
+
+# Validation with autocorrelation
+def plot_acf(data, lags=40, title=''):
+    acf = [1.]
+    for i in range(1, lags + 1):
+        acf.append(np.corrcoef(data[i:], data[:-i])[0,1])
+    
+    plt.figure(figsize=(10, 4))
+    plt.bar(range(len(acf)), acf)
+    plt.title(f'Autocorrelation Function: {title}')
+    plt.xlabel('Lag')
+    plt.ylabel('ACF')
+    plt.grid(True, alpha=0.3)
+    plt.show()
+
+# Plot ACF for μ and τ (excluding first 100 samples)
+plot_acf(sampler.mu_samples[100:], title='μ')
+plot_acf(sampler.tau_samples[100:], title='τ')
+
+# Calculate VaR and ES
+def calculate_var_es(mu, tau, alpha=0.05):
+    sigma = 1/np.sqrt(tau)
+    z_alpha = norm.ppf(alpha)
+    var = mu + z_alpha * sigma
+    es = mu + norm.pdf(z_alpha)/alpha * sigma
+    return var, es
+
+# Calculate VaR and ES for multiple samples
+vars = []
+es = []
+for i in range(len(sampler.mu_samples)):
+    var, es_val = calculate_var_es(sampler.mu_samples[i], sampler.tau_samples[i])
+    vars.append(var)
+    es.append(es_val)
+
+# Plot VaR vs ES
+plt.figure(figsize=(10, 6))
+plt.scatter(vars, es, alpha=0.5)
+plt.xlabel('Value at Risk (VaR)')
+plt.ylabel('Expected Shortfall (ES)')
+plt.title('VaR vs ES Correlation')
+plt.grid(True, alpha=0.3)
+
+# Calculate correlation coefficient
+correlation = np.corrcoef(vars, es)[0,1]
+plt.text(0.05, 0.95, f'Correlation: {correlation:.3f}', 
+         transform=plt.gca().transAxes, 
+         bbox=dict(facecolor='white', alpha=0.8))
+
+# Fit and plot regression line
+z = np.polyfit(vars, es, 1)
+p = np.poly1d(z)
+plt.plot(vars, p(vars), "r--", alpha=0.8)
+plt.show()
+
+# Advanced scatter plot analysis
+plt.figure(figsize=(12, 8))
+
+# Create scatter plot with density coloring
+xy = np.vstack([vars, es])
+z = stats.gaussian_kde(xy)(xy)
+
+# Sort the points by density
+idx = z.argsort()
+vars_sorted, es_sorted, z = np.array(vars)[idx], np.array(es)[idx], z[idx]
+
+# Plot scatter with density coloring
+scatter = plt.scatter(vars_sorted, es_sorted, c=z, s=50, alpha=0.5, cmap='viridis')
+plt.colorbar(scatter, label='Point Density')
+
+# Add regression line
+z = np.polyfit(vars, es, 1)
+p = np.poly1d(z)
+plt.plot(vars, p(vars), "r--", linewidth=2, label=f'Regression Line: y = {z[0]:.3f}x + {z[1]:.3f}')
+
+# Add labels and title
+plt.xlabel('Value at Risk (VaR)', fontsize=12)
+plt.ylabel('Expected Shortfall (ES)', fontsize=12)
+plt.title('VaR vs ES Relationship with Density Visualization', fontsize=14)
+
+# Add correlation coefficient
+plt.text(0.05, 0.95, f'Correlation: {correlation:.3f}', 
+         transform=plt.gca().transAxes,
+         bbox=dict(facecolor='white', alpha=0.8, edgecolor='gray'),
+         fontsize=10)
+
+plt.grid(True, alpha=0.3)
+plt.legend()
+plt.show()
+
+# Print statistical summary
+print(f"Correlation coefficient between VaR and ES: {correlation:.3f}")
+print(f"Linear regression equation: ES = {z[0]:.3f}*VaR + {z[1]:.3f}")
+
+# Additional statistical analysis
+from scipy import stats
+
+# Perform linear regression analysis
+slope, intercept, r_value, p_value, std_err = stats.linregress(vars, es)
+
+print("\nDetailed Statistical Analysis:")
+print(f"R-squared: {r_value**2:.3f}")
+print(f"P-value: {p_value:.3e}")
+print(f"Standard error: {std_err:.3f}")
+print(f"Slope (95% CI): {slope:.3f} ± {2*std_err:.3f}")
+
+# Calculate and plot residuals
+residuals = np.array(es) - p(vars)
+
+plt.figure(figsize=(10, 5))
+plt.subplot(1, 2, 1)
+plt.hist(residuals, bins=30, density=True, alpha=0.7)
+plt.title('Distribution of Residuals')
+plt.xlabel('Residual Value')
+plt.ylabel('Density')
+
+plt.subplot(1, 2, 2)
+plt.scatter(p(vars), residuals, alpha=0.5)
+plt.axhline(y=0, color='r', linestyle='--')
+plt.title('Residuals vs Fitted Values')
+plt.xlabel('Fitted Values')
+plt.ylabel('Residuals')
+
+plt.tight_layout()
+plt.show()
+
+# Test for normality of residuals
+statistic, normality_p_value = stats.normaltest(residuals)
+print(f"\nNormality test of residuals:")
+print(f"Statistic: {statistic:.3f}")
+print(f"P-value: {normality_p_value:.3e}")
