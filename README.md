@@ -103,6 +103,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
   - Advanced Statistical Computing: Gibbs Sampler implementation
 
 ## Contact
-[Abby] - [sw546@duke.edu]
+[Siyuan Wang] - [sw546@duke.edu]
 
 Project Link: [https://github.com/abbywang2003/Analyzing-Sustainable-stock-exchange-in-Python-]
