@@ -60,13 +60,30 @@ where:
 ### Data Processing Pipeline
 
 ```mermaid
-graph LR
-    A[Raw SSE Data] --> B[Log Returns]
-    B --> C[Parameter Estimation]
-    C --> D[Distribution Validation]
-    D --> E[Risk Metrics]
-    E --> F[Correlation Analysis]
+mindmap
+  root((SSE Analysis))
+    Data Processing
+      Raw Data Import
+      Log Returns
+      Cleaning
+    Bayesian Analysis
+      Prior Distribution
+      Gibbs Sampling
+      Posterior Distribution
+    Validation
+      ACF Analysis
+      Convergence Check
+    Risk Assessment
+      VaR Calculation
+      ES Calculation
+      Correlation Analysis
+    Results
+      Visualizations
+      Statistical Reports
 ```
+
+
+
 ## 📊 Analysis Results & Visualizations
 
 ### 1. Distribution of Log Returns
@@ -173,7 +190,7 @@ Required packages:
 ### Running the Analysis
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/sse-analysis.git
+git clone [https://github.com/abbywang2003/Analyzing-Sustainable-stock-exchange-in-Python-/tree/main]
 
 # Navigate to project directory
 cd sse-analysis
