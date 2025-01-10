@@ -92,7 +92,7 @@ Key observations:
 The ACF plots validate our distribution by showing the decay of autocorrelation over different lags:
 
 <div align="center">
-  < img src="results/figures/acf_plot.png" alt="Autocorrelation Function Plot" width="700"/>
+<img src="img/acf_plot.png" alt="Autocorrelation Function Plot" width="700"/>
 </div>
 
 Insights:
@@ -201,13 +201,10 @@ python src/main.py
 
 ## 📫 Contact
 
-- **Author**: [Your Name]
-- **Email**: [your.email@example.com]
-- **LinkedIn**: [Your LinkedIn Profile]
+- **Author**: [Abby Wang]
+- **Email**: [sw546@duke.edu]
+- **LinkedIn**: [https://www.linkedin.com/in/siyuan-wang-abby/]
 
-## 📜 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 ⭐ If you find this project useful, please consider giving it a star!
