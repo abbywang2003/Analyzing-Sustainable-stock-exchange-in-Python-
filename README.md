@@ -73,14 +73,14 @@ graph LR
 This visualization shows the distribution of logarithmic returns, demonstrating its approximate normal distribution as supported by the law of large numbers.
 
 <div align="center">
-  < img src="img/log_returns_dist.png"/>
+<img src="img/CS101 FP_Report.png.jpg" width="700"/>
 </div>
 
 ### 2. Parameter Convergence from Gibbs Sampling
 These plots show the convergence of μ and τ parameters through the Gibbs sampling process:
 
 <div align="center">
-  < img src="results/figures/gibbs_convergence.png" alt="Gibbs Sampling Convergence" width="700"/>
+<img src="img/gibbs_convergence.png" alt="Gibbs Sampling Convergence" width="700"/>
 </div>
 
 Key observations:
@@ -104,7 +104,7 @@ Insights:
 The scatter plot demonstrates the strong linear relationship between VaR and ES metrics:
 
 <div align="center">
-  < img src="results/figures/var_es_correlation.png" alt="VaR and ES Correlation" width="700"/>
+<img src="img/var_es_correlation.png" alt="VaR and ES Correlation" width="700"/>
 </div>
 
 Key findings:
