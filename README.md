@@ -84,7 +84,7 @@ graph TD
 This visualization shows the distribution of logarithmic returns, demonstrating its approximate normal distribution as supported by the law of large numbers.
 
 <div align="center">
-<img src="img/CS101 FP_Report.png.jpg" width="700"/>
+<img src="img/log_returns.jpg" width="700"/>
 </div>
 
 ### 2. Parameter Convergence from Gibbs Sampling
