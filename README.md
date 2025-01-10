@@ -60,27 +60,21 @@ where:
 ### Data Processing Pipeline
 
 ```mermaid
-mindmap
-  root((SSE Analysis))
-    Data Processing
-      Raw Data Import
-      Log Returns
-      Cleaning
-    Bayesian Analysis
-      Prior Distribution
-      Gibbs Sampling
-      Posterior Distribution
-    Validation
-      ACF Analysis
-      Convergence Check
-    Risk Assessment
-      VaR Calculation
-      ES Calculation
-      Correlation Analysis
-    Results
-      Visualizations
-      Statistical Reports
+graph TD
+    A[fa:fa-database Raw Data] -->|Import & Clean| B[fa:fa-calculator Log Returns]
+    B -->|Bayesian Analysis| C[fa:fa-cogs Parameter Estimation]
+    C -->|Validation| D[fa:fa-check-circle Distribution Check]
+    D -->|Compute| E[fa:fa-chart-line Risk Metrics]
+    E -->|Analyze| F[fa:fa-file-alt Results]
+
+    style A fill:#f9f,stroke:#333,stroke-width:4px
+    style B fill:#bbf,stroke:#333,stroke-width:4px
+    style C fill:#dfd,stroke:#333,stroke-width:4px
+    style D fill:#ffd,stroke:#333,stroke-width:4px
+    style E fill:#dff,stroke:#333,stroke-width:4px
+    style F fill:#fff,stroke:#333,stroke-width:4px
 ```
+
 
 
 
