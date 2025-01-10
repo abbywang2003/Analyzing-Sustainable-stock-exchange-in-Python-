@@ -73,7 +73,7 @@ graph LR
 This visualization shows the distribution of logarithmic returns, demonstrating its approximate normal distribution as supported by the law of large numbers.
 
 <div align="center">
-  < img src="results/figures/log_returns_dist.png" alt="Log Returns Distribution" width="700"/>
+  < img src="img/log_returns_dist.png"/>
 </div>
 
 ### 2. Parameter Convergence from Gibbs Sampling
